@@ -19,13 +19,6 @@ ln -fs /usr/share/zoneinfo/Asia/Bangkok /etc/localtime
 
 clear
 IP=$(wget -4qO- "http://whatismyip.akamai.com/")
-
-if [[ -e /etc/debian_version ]]; then
-	OS=debian
-	VERSION_ID=$(cat /etc/os-release | grep "VERSION_ID")
-	GROUPNAME=nogroup
-	RCLOCAL='/etc/rc.local'
-
 # Color
 GRAY='\033[1;33m'
 GREEN='\033[0;32m'
