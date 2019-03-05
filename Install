@@ -289,10 +289,10 @@ END
 
 # Install Proxy
 if [[ -e /etc/squid/squid.conf ]]; then
-	apt-get -y remove --purge squid3
+	apt-get -y remove --purge squid
 fi
 
-		apt-get -y install squid3
+		apt-get -y install squid
 		cat > /etc/squid/squid.conf <<END
 http_port $PROXY
 acl localhost src 127.0.0.1/32 ::1
@@ -328,7 +328,7 @@ sed -i $IP2 /etc/squid/squid.conf;
 # Restart all system installed
 /etc/init.d/openvpn restart
 /etc/init.d/nginx restart
-/etc/init.d/squid3 restart
+/etc/init.d/squid restart
 
 	wget -O /usr/local/bin/menu "https://raw.githubusercontent.com/nevermore1258/OpenVPN/master/Menu"
 	chmod +x /usr/local/bin/menu
