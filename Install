@@ -288,12 +288,12 @@ server {
 END
 
 # Install Proxy
-if [[ -e /etc/squid3/squid.conf ]]; then
+if [[ -e /etc/squid/squid.conf ]]; then
 	apt-get -y remove --purge squid3
 fi
 
 		apt-get -y install squid3
-		cat > /etc/squid3/squid.conf <<END
+		cat > /etc/squid/squid.conf <<END
 http_port $PROXY
 acl localhost src 127.0.0.1/32 ::1
 acl to_localhost dst 127.0.0.0/8 0.0.0.0/32 ::1
@@ -323,7 +323,7 @@ refresh_pattern -i (/cgi-bin/|\?) 0     0%      0
 refresh_pattern .               0       20%     4320
 END
 IP2="s/xxxxxxxxx/$IP/g";
-sed -i $IP2 /etc/squid3/squid.conf;
+sed -i $IP2 /etc/squid/squid.conf;
 
 # Restart all system installed
 /etc/init.d/openvpn restart
