@@ -135,8 +135,8 @@ ifconfig-pool-persist ipp.txt" > /etc/openvpn/server.conf
 		done
 		;;
 		2)
+		echo 'push "dhcp-option DNS 1.1.1.1"' >> /etc/openvpn/server.conf
 		echo 'push "dhcp-option DNS 8.8.8.8"' >> /etc/openvpn/server.conf
-		echo 'push "dhcp-option DNS 8.8.4.4"' >> /etc/openvpn/server.conf
 		;;
 	esac
 	echo "keepalive 10 120
@@ -303,7 +303,6 @@ acl localnet src 192.168.0.0/16
 acl SSL_ports port 443
 acl Safe_ports port 80
 acl Safe_ports port 21
-acl Safe_ports port 443
 acl Safe_ports port 70
 acl Safe_ports port 210
 acl Safe_ports port 1025-65535
@@ -316,7 +315,8 @@ acl SSH dst xxxxxxxxx-xxxxxxxxx/255.255.255.255
 http_access allow SSH
 http_access allow localnet
 http_access allow localhost
-http_access deny all
+http_access allow allow_network
+http_access allow all
 refresh_pattern ^ftp:           1440    20%     10080
 refresh_pattern ^gopher:        1440    0%      1440
 refresh_pattern -i (/cgi-bin/|\?) 0     0%      0
