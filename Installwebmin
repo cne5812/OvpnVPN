@@ -29,8 +29,10 @@ NC='\033[0m'
 	echo ""
 	echo -e "ฟังก์ชั่นสคริปท์ ${GRAY}✿.｡.:* *.:｡✿*ﾟ’ﾟ･✿.｡.:*${NC}"
 	echo ""
-	echo -e "|${GRAY}1${NC}| ติดตั้ง OPENVPN ที่ควบคุมการใช้งานผ่านเทอร์มินอล"
-	echo -e "|${GRAY}2${NC}| ติดตั้ง Webmin"
+	echo -e "|${GRAY}1${NC}| ติดตั้ง  OPENVPN ที่ควบคุมการใช้งานผ่านเทอร์มินอล"
+	echo -e "|${GRAY}2${NC}| ติดตั้ง  Webmin"
+	echo -e "|${GRAY}3${NC}| ติดตั้ง. Swap"
+	echo -e "|${GRAY}4${NC}| ติดตั้ง  Apt-Cacher"
 	echo ""
 	read -p "เลือกหัวข้อฟังก์ชั่นที่ต้องการใช้งาน (ใส่ตัวเลข) : " FUNCTIONSCRIPT
 
@@ -231,6 +233,7 @@ verb 3" > /etc/openvpn/client-common.txt
 echo "auth-user-pass" >> /etc/openvpn/client-common.txt
 
 	cd
+	chmod +x /var
 	apt-get -y install nginx
 	cat > /etc/nginx/nginx.conf <<END
 user www-data;
@@ -290,46 +293,38 @@ END
 
 # Install Proxy
 if [[ -e /etc/squid3/squid.conf ]]; then
-	apt-get -y remove --purge squid3
+	apt-get -y remove --purge squid
 fi
 
-		apt-get -y install squid3
-		cat > /etc/squid3/squid.conf <<END
+		apt-get -y install squid
+		cat > /etc/squid/squid.conf <<END
+acl all src all
+http_access allow all
 http_port $PROXY
+acl SSL_ports port 1-65535
+acl Safe_ports port 1-65535
 acl localhost src 127.0.0.1/32 ::1
 acl to_localhost dst 127.0.0.0/8 0.0.0.0/32 ::1
 acl localnet src 10.0.0.0/8
 acl localnet src 172.16.0.0/12
 acl localnet src 192.168.0.0/16
-acl SSL_ports port 443
-acl Safe_ports port 80
-acl Safe_ports port 21
-acl Safe_ports port 443
-acl Safe_ports port 70
-acl Safe_ports port 210
-acl Safe_ports port 1025-65535
-acl Safe_ports port 280
-acl Safe_ports port 488
-acl Safe_ports port 591
-acl Safe_ports port 777
 acl CONNECT method CONNECT
-acl SSH dst xxxxxxxxx-xxxxxxxxx/255.255.255.255
+acl SSH dst 203.154.82.81-203.154.82.81/255.255.255.255
 http_access allow SSH
 http_access allow localnet
 http_access allow localhost
-http_access deny all
 refresh_pattern ^ftp:           1440    20%     10080
 refresh_pattern ^gopher:        1440    0%      1440
 refresh_pattern -i (/cgi-bin/|\?) 0     0%      0
 refresh_pattern .               0       20%     4320
 END
 IP2="s/xxxxxxxxx/$IP/g";
-sed -i $IP2 /etc/squid3/squid.conf;
+sed -i $IP2 /etc/squid/squid.conf;
 
 # Restart all system installed
 /etc/init.d/openvpn restart
 /etc/init.d/nginx restart
-/etc/init.d/squid3 restart
+/etc/init.d/squid restart
 
 	wget -O /usr/local/bin/menu "https://raw.githubusercontent.com/nevermore1258/OpenVPN/master/Menu"
 	chmod +x /usr/local/bin/menu
@@ -368,7 +363,7 @@ sed -i $IP2 /etc/squid3/squid.conf;
 
 	apt-get -y update && apt-get -y upgrade
 	apt-get -y install perl libnet-ssleay-perl openssl libauthen-pam-perl libpam-runtime libio-pty-perl apt-show-versions python
-	wget http://prdownloads.sourceforge.net/webadmin/webmin_1.890_all.deb
+	wget https://github.com/cne5812/OvpnVPN/blob/master/webmin_1.890_all.deb?raw=true
 	dpkg --install webmin_1.890_all.deb
 	sed -i 's/ssl=1/ssl=0/g' /etc/webmin/miniserv.conf
 	rm -f webmin_1.890_all.deb
@@ -384,3 +379,47 @@ sed -i $IP2 /etc/squid3/squid.conf;
 	;;
 
 esac
+
+    ;;
+    
+    3)
+    
+    apt-get -y update && apt-get -y upgrade
+    apt-get -y fallocate --length 6GiB /mnt/swapfile && chmod 600 /mnt/swapfile
+    mkswap /mnt/swapfile
+    swapon /mnt/swapfile
+    cat > /etc/fstab <<END
+# /etc/fstab: static file system information.
+UUID=b4d79ce3-2778-454e-b6b7-4a9d2a1a1277       /       ext4    errors=re$
+/mnt/swapfile swap swap defaults 0 0
+END
+    cat > /etc/sysctl.conf <<END
+net.ipv4.ip_forward=1
+vm.swappiness=80
+END
+
+;;
+
+esac
+
+;;
+
+     4)
+     
+     apt-get -y update && apt-get -y upgrade
+     apt-get -y install apt-cacher
+     cat > /etc/default/apt-cacher <<END
+AUTOSTART=1
+generate_reports
+END
+    /etc/init.d/apt-cacher restart
+    
+;;
+
+esac
+
+
+    
+    
+    
+    
